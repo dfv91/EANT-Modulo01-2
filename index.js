@@ -1,15 +1,48 @@
 const http = require("http")
 const fs = require("fs")
 const path = require("path")
+const form = require("querystring")
+const loki = require("lokijs")
 
 const port = 80
 
+let noticias= null;
+
+let db = new loki("noticias.json", {
+	autoload: true,
+    autosave: true, 
+    autosaveInterval: 4000,
+    autoloadCallback : function(){
+    	noticias = db.getCollection("noticias")
+    	if( noticias === null ){
+    		noticias = db.addCollection("noticas")
+    	} 
+    }
+})
+
 http.createServer(function(request, response){
-	let dir = "Publico/" //<-- Carpeta de proyecto
+	let dir = "./Publico" //<-- Carpeta de proyecto
 
 	//let file = request.url //<-- Archivo solicitado
 
 	let file = (request.url == "/") ? "index.html" : request.url //<-- Archivo solicitado
+
+		if( request.method == "POST" && file == "/enviar"){ //Aca hay que procesar los datos del formulario
+			
+			request.on("data", function(body){
+
+				let datos = body.toString()
+					datos = form.parse(datos)
+
+				noticias.insert(datos)
+
+				console.log( datos )
+				response.end("mira el archivo noticias.json")
+
+			})
+
+		}
+
 	let ext = String( path.extname(file) ).toLowerCase() //<--extensiones ".html", ".css", ".js", etc
 	let tipos = {
 			".html"	: "text/html",
@@ -34,7 +67,7 @@ http.createServer(function(request, response){
 
 
 
-	console.log("Archivo solicitado: " + dir + file)
+	
 
 	fs.readFile(dir + file, function(error, content){//<-- intentar leer el recurso solicitado
 
