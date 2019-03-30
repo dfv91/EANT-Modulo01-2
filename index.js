@@ -1,86 +1,54 @@
-const http = require("http")
-const fs = require("fs")
-const path = require("path")
-const form = require("querystring")
 const loki = require("lokijs")
+const express = require ("express")
+const bodyParser = require ("body-parser")
+
+const app = express ()
 
 const port = 80
 
-let noticias= null;
+let noticiasColeccion= null;
 
 let db = new loki("noticias.json", {
 	autoload: true,
     autosave: true, 
     autosaveInterval: 4000,
     autoloadCallback : function(){
-    	noticias = db.getCollection("noticias")
-    	if( noticias === null ){
-    		noticias = db.addCollection("noticas")
+    	noticiasColeccion = db.getCollection("noticias")
+    	if( noticiasColeccion === null ){
+    		noticiasColeccion = db.addCollection("noticas")
     	} 
     }
 })
 
-http.createServer(function(request, response){
-	let dir = "./Publico" //<-- Carpeta de proyecto
+app.set("view engine","ejs")
 
-	//let file = request.url //<-- Archivo solicitado
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded( {extended: true} ))
+app.use(express.static("publico"))
 
-	let file = (request.url == "/") ? "index.html" : request.url //<-- Archivo solicitado
+app.get("/",function(request,response){
+    response.send("hola")
+})
 
-		if( request.method == "POST" && file == "/enviar"){ //Aca hay que procesar los datos del formulario
-			
-			request.on("data", function(body){
+app.get("/noticias",function(request,response){
+    let notas = noticiasColeccion.chain().data()
+    response.send(notas)
+})
 
-				let datos = body.toString()
-					datos = form.parse(datos)
+app.get("/noticias/:id",function(request,response){
+    let noticiaId = request.params.id
+    let nota = noticiasColeccion.get(noticiaId)
+    response.send(notas)
+})
 
-				noticias.insert(datos)
-
-				console.log( datos )
-				response.end("mira el archivo noticias.json")
-
-			})
-
-		}
-
-	let ext = String( path.extname(file) ).toLowerCase() //<--extensiones ".html", ".css", ".js", etc
-	let tipos = {
-			".html"	: "text/html",
-			".js"	: "text/javascript",
-			".css"	: "text/css",
-			".txt" 	: "text/plain",
-			".json"	: "application/json",
-			".png"	: "image/png",
-			".jpg"	: "image/jpg",
-			".gif"	: "image/gif",
-			".ico"	: "image/x-icon",
-			".wav"	: "audio/wav",
-			".mp4"	: "video/mp4",
-			".woff"	: "application/font-woff",
-			".ttf"	: "application/font-ttf",
-			".eot"	: "application/vnd.ms-fontobject",
-			".otf"	: "application/font-otf",
-			".svg"	: "application/image/svg+xml"
-	}
-
-	let contenType = tipos[ext] || "application/octet-stream"
+app.post("/noticias", function(request,response){
+    let body = request.body
+    noticiasColeccion.insert(body)
+    response.send(body)
 
 
+})
 
-	
-
-	fs.readFile(dir + file, function(error, content){//<-- intentar leer el recurso solicitado
-
-		if( error ){//<-- si hay un error
-			response.end("Archivo no encontrado :(")
-		} else {//<-- si lo encontro
-			response.writeHead(200, { "Content-Type" : contenType})
-			response.end(content)
-		}
-
-	})
-
-
-
-
-}).listen(port)
+app.listen(port,function(){
+	console.log("servidor iniciado")
+})

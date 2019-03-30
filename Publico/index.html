@@ -140,16 +140,20 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script>
       const ajax = new XMLHttpRequest();
-      ajax.open("GET", "noticias.json");
+      ajax.open("GET", "/noticias");
       ajax.onload = function(){
         if(ajax.status == 200){
           let noticias = JSON.parse(ajax.response)
+          let imagenes = ["sorteo-libertadores.jpg","tickets-rusia-mundial.jpg","firpo.jpg","buenos-aires.jpg"]
 
           noticias.forEach(function(noticia){
             let plantilla = document.querySelector(".articulo").cloneNode(true)
             plantilla.querySelector("h3").innerText = noticia.titulo
             plantilla.querySelector(".small a").innerText = noticia.autor
             plantilla.querySelector("p:last-child").innerText = noticia.detalle
+
+            let imagen = imagenes[ Math.floor( Math.random() * imagenes.length) ]
+
             plantilla.querySelector("img").src = "img/" + noticia.imagen
 
             document.querySelector("main").appendChild( plantilla )
