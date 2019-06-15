@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import slugify from '../helpers/String.js'
 
+
 class Product extends Component {
 
   constructor(){
@@ -31,6 +32,7 @@ class Product extends Component {
           <p className="card-text">{this.props.item.Presentacion}</p>
           <p><span className="badge badge-primary">{this.props.item.Precio}</span></p>
           <a href={url} onClick={this.verProducto.bind(this)} className="btn btn-primary">Ver +</a>
+          <button className="btn btn-danger" data-toggle="modal" data-target="#react-modal">Editar</button>
         </div>
       </div>
       </article>
