@@ -5,8 +5,8 @@ class Menu extends Component {
   render(){
 
     return(
-      <nav className="navbar navbar-dark navbar-expand-sm bg-dark">
-        <ul className="navbar-nav mx-auto"><Items links={this.props.links} /></ul>
+      <nav className="container-fluid">
+        <ul className="nav nav-pills nav-fill"><Items links={this.props.links} /></ul>
       </nav>
     )
   }
@@ -40,7 +40,7 @@ class Items extends Component{
       return this.state.categories.map(
         (link, index) =>
         <li className= "nav-item" key={index}>
-          <a className="nav-link" href={slugify(link)}>{link}</a>
+          <a className="nav-link btn-info m-1" href={slugify(link)}>{link}</a>
         </li>
         )
     }

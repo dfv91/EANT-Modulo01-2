@@ -33,6 +33,7 @@ class App extends React.Component {
         products : [],
         loaded : false
     }
+    this.actualizarEstado = this.actualizarEstado.bind(this)
   }
 
   componentWillMount(){
@@ -44,21 +45,23 @@ class App extends React.Component {
     })
     */
 
-    API.getData("https://api.myjson.com/bins/fb377").then((productos) => {
+    API.getData("https://api.myjson.com/bins/dcg2p").then((productos) => {
       this.setState({ products : productos, loaded : true })
     })
   }
 
-  agregarProducto(){}
-
-  editarProducto(){
-    console.log("editare el producto nro 14")
-    console.log( this.state.products[13])
+  actualizarEstado(theProduct, borrar = false){
+    if( !borrar){
+      this.setState({
+        products : this.state.products.map(
+          oldProduct => oldProduct.idProducto === theProduct.idProducto ? theProduct : oldProduct
+        )
+     })
+   } else {
+     console.log("voy a borrar")
+     console.log(theProduct)
+   }
   }
-
-  borrarProducto(){}
-
-  buscarProducto(){}
 
   render(){
     if( !this.state.loaded ){
@@ -66,17 +69,17 @@ class App extends React.Component {
     } else {
 
       const losProductos = this.state.products.map(
-        (product, index)=> <Product item={product} key={index} itemID={product.idProducto} onEditarProducto={this.editarProducto} />
+        (product, index)=> <Product item={product} key={index} onActualizarProducto={this.actualizarEstado} />
       )
 
       return (
       <div className="App">
         <Header title={this.state.title} slogan={this.state.slogan}/>
-
-        <button onClick={this.editarProducto.bind(this)}>EDITAR</button>
-
+        <button onClick={this.actualizarEstado}>actualizar estado</button>
         <Menu links={this.state.products} />
-        <section className="row">{losProductos}</section>
+        <section className="container-fluid">
+          <div className="row">{losProductos}</div>
+        </section>
         <Modal />
       </div>
     );}
